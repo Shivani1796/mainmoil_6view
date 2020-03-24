@@ -1,6 +1,16 @@
+// change code-21-03-2020 @shivani
+
 #include "car6view.h"
+
+#include <string>
+#include<iostream>
+
 #define MAP_CACHE_ENABLED true
 #define USE_PICAMERA true
+
+#define MAX_FRAME 1000
+char *IMAGES = "/home/shivani/Documents/fisheye-test-images/img8/";
+
 Car6view::Car6view(){
     md = new Moildev();
 }
@@ -10,18 +20,41 @@ void Car6view::Show() {
 //cout << "test" << endl;
 //return ;
 
-    md->Config("car", 1.4, 1.4,
-        1320.0, 1017.0, 1.048,
+//Intel T265 parameters:21stMarch-2020
+   md->Config("car", 3, 3,
+        427, 394, 1,			//center 
+        848, 800, 1.68,			// resolution	
+        0,0, -24.964, 38.2, -16.956, 183.42 //calibration
+        );
+
+
+/* md->Config("car", 1.4, 1.4,
+        1320.0, 1017.0, 1.048,       //orignal_parameters
         2592, 1944, 4.05,
         0, 0, 0, 0, -47.96, 222.86
         );
-    double calibrationWidth = md->getImageWidth();
+
+  */      
+
+double calibrationWidth = md->getImageWidth();
 double iCy = md->getiCy();
 ConfigData *cd = md->getcd();
-    image_input = imread( "images/image.jpg", IMREAD_COLOR);
+//char filename[100];
+
+for(int numFrame=1; numFrame < 3; numFrame++)	
+{
+	//sprintf(filename, "%s%d.png",IMAGES, numFrame);
+	
+  // cout<<"print filename"<<filename<<endl;
+
+   image_input = imread("/home/shivani/Documents/fisheye-test-images/img8/1.png", IMREAD_COLOR);
+   //cout<<"image input is = "<<image_input<<endl;
+
     MediaType mediaType = MediaType::IMAGE_FILE;
     double w = image_input.cols;
     double h = image_input.rows;
+
+
 
     mapX[0] = Mat(h, w, CV_32F);
     mapX[1] = Mat(w, h, CV_32F);
@@ -33,6 +66,8 @@ ConfigData *cd = md->getcd();
          mapX[i] = Mat(h, w, CV_32F);
     for (uint i=3;i<7;i++)
          mapY[i] = Mat(h, w, CV_32F);
+
+cout<<"print1"<<endl;
 
     Mat image_result(h, w, CV_32F);
     Mat image_resultv(w, h, CV_32F);
@@ -70,10 +105,8 @@ for (i=0;i<7;i++) {
     MatWrite(str_x,mapX[i]);
     MatWrite(str_y,mapY[i]);
 }
-
-
 }
-
+cout<<"print2"<<endl;
 }
 else {
     md->AnyPointM((float *)mapX[0].data, (float *)mapY[0].data, mapX[0].cols, mapX[0].rows, 0, 0, 4, m_ratio);       // front view
@@ -84,21 +117,37 @@ else {
     md->AnyPointM((float *)mapX[5].data, (float *)mapY[5].data, mapX[5].cols, mapX[5].rows, 70, 135, 4, m_ratio);   // right-lower view, rotate 180
     md->PanoramaM((float *)mapX[6].data, (float *)mapY[6].data, mapX[6].cols, mapX[6].rows, m_ratio, 110);   // panorama
 }
+cout<<"print3"<<endl;
 
-    double time_clock = (double)(clock() - tStart)/CLOCKS_PER_SEC ;
+double time_clock = (double)(clock() - tStart)/CLOCKS_PER_SEC ;
 cout << "time: " << time_clock << endl ; 
     Vec3b p(0,0,0) ;
     image_input.at<Vec3b>(0, 0) = p;
 
-    DisplayCh(0);
+cout<<"print4"<<endl;
+
+ DisplayCh(0);  // img-display
  char c;
- while(1){ 
-     c = waitKey( 100 );
-     if(c == 27) break;
-     if(c == 'c') {
+ cout<< "value of c is " <<c <<endl;
+// yaha while loop me condition tre nh ho rhi jiske krn code chlte ja rhe again-gaian.
+ while(1) { 
+
+     c = waitKey(10000 ); //
+     cout<< "value of waitkey c is  " << c << endl; 
+
+ if(c == 27) break;
+	//cout<<" 1st condition  "<<endl;
+    
+ if(c == 'c')  //never true
+    {
+	//cout<<"2nd condition  "<<endl;
             openCamara();
      } 
+
+//cout<<"while loop close"<<endl;
      }
+
+cout<<"print5"<<endl;
 
     cvDestroyWindow("image_input");
     cvDestroyWindow("Front");
@@ -109,7 +158,8 @@ cout << "time: " << time_clock << endl ;
     cvDestroyWindow("Lower right");     
     image_result.release();
     image_resultv.release();
-
+}
+cout<<"here end of for loop"<<endl;
 }
 void Car6view::DisplayCh(int ch)
 {
@@ -427,4 +477,3 @@ Car6view::~Car6view()
     freeMemory();
     delete md;
 }
-
