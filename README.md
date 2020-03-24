@@ -1,5 +1,7 @@
 # Mainmoil 6view
-By- Shivani
+Modified by- Shivani
+
+
 **Input Image**
 ![screenshot](https://github.com/Shivani1796/mainmoil_6view/blob/shivani/images/1.png)
 
